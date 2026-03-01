@@ -1,0 +1,24 @@
+{
+  "appId": "com.portfolio.dashboard",
+  "appName": "Portfolio Dashboard",
+  "webDir": "dist",
+  "bundledWebRuntime": false,
+  "server": {
+    "androidScheme": "https"
+  },
+  "android": {
+    "minWebViewVersion": 55,
+    "webContentsDebuggingEnabled": true,
+    "allowMixedContent": true,
+    "useLegacyBridge": false,
+    "backgroundColor": "#ffffff"
+  },
+  "plugins": {
+    "CapacitorCookies": {
+      "enabled": true
+    },
+    "CapacitorHttp": {
+      "enabled": true
+    }
+  }
+}

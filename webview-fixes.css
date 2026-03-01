@@ -1,0 +1,197 @@
+/* Фиксы для старых версий WebView (Chrome 69 и ниже) */
+
+
+/* Улучшение рендеринга */
+* {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Поддержка CSS Grid для старых браузеров */
+.grid-fallback {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+@supports (display: grid) {
+  .grid-fallback {
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-gap: 1rem;
+  }
+}
+
+
+/* Фиксы для производительности */
+.performance-fix {
+  will-change: transform;
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+}
+
+/* Фиксы для scrolling */
+.scroll-smooth {
+  -webkit-overflow-scrolling: touch;
+  overflow-scrolling: touch;
+}
+
+/* Flexbox фиксы */
+.flex-safe {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+}
+
+.flex-wrap-safe {
+  -webkit-flex-wrap: wrap;
+  -ms-flex-wrap: wrap;
+  flex-wrap: wrap;
+}
+
+/* Фиксы для анимаций */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    -webkit-transform: translateY(20px);
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    -webkit-transform: translateY(0);
+    transform: translateY(0);
+  }
+}
+
+.fade-in {
+  -webkit-animation: fadeIn 0.3s ease-in-out;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+/* Фиксы для кнопок */
+button {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  border: none;
+  outline: none;
+  cursor: pointer;
+}
+
+/* Фиксы для инпутов */
+input, textarea {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  border-radius: 0;
+}
+
+/* Фиксы для теней */
+.shadow-safe {
+  -webkit-box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+/* Фиксы для border-radius */
+.rounded-safe {
+  -webkit-border-radius: 0.5rem;
+  border-radius: 0.5rem;
+}
+
+/* Фиксы для градиентов */
+.gradient-safe {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: -webkit-linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: -moz-linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+/* Фиксы для sticky позиционирования */
+.sticky-safe {
+  position: -webkit-sticky;
+  position: sticky;
+  top: 0;
+}
+
+/* Фиксы для CSS Variables */
+:root {
+  --primary-color: #3b82f6;
+  --secondary-color: #64748b;
+  --success-color: #10b981;
+  --warning-color: #f59e0b;
+  --error-color: #ef4444;
+}
+
+/* Fallback для CSS Variables */
+.text-primary {
+  color: #3b82f6;
+  color: var(--primary-color);
+}
+
+.bg-primary {
+  background-color: #3b82f6;
+  background-color: var(--primary-color);
+}
+
+/* Фиксы для viewport units */
+.vh-100-safe {
+  height: 100vh;
+  height: -webkit-fill-available;
+}
+
+/* Фиксы для object-fit */
+.object-cover-safe {
+  object-fit: cover;
+  -o-object-fit: cover;
+  font-family: 'object-fit: cover;';
+}
+
+/* Фиксы для backdrop-filter */
+.backdrop-blur-safe {
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+/* Фиксы для gap в flexbox */
+.gap-safe > * + * {
+  margin-left: 1rem;
+}
+
+.gap-y-safe > * + * {
+  margin-top: 1rem;
+}
+
+/* Фиксы для aspect-ratio */
+.aspect-square-safe {
+  aspect-ratio: 1 / 1;
+}
+
+.aspect-square-safe::before {
+  content: '';
+  display: block;
+  padding-bottom: 100%;
+}
+
+.aspect-square-safe > * {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+
+/* Фиксы для text-overflow */
+.truncate-safe {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Фиксы для position: fixed на мобильных */
+.fixed-safe {
+  position: fixed;
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+}
+

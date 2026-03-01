@@ -1,0 +1,6 @@
+{
+  "name": "Portfolio Structure Dashboard",
+  "description": "An online dashboard displaying the current state and asset distribution of an investment portfolio. Features a donut chart and detailed asset breakdown in a dark theme. Requires an internet connection.",
+  "requestFramePermissions": [],
+  "prompt": ""
+}
