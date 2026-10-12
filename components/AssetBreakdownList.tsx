@@ -5,6 +5,7 @@
 import React from 'react';
 import { Asset } from '../types';
 import { THEME_PALETTE, UI_CLASSES } from '../constants';
+import { Language } from '../i18n';
 
 /**
  * Props for the AssetBreakdownList component.
@@ -13,6 +14,7 @@ interface AssetBreakdownListProps {
   assets: Asset[];
   totalValue: number; // Total portfolio value for calculating absolute amounts
   currency: string; // Currency symbol (e.g., '₽')
+  language: Language;
 }
 
 /**
@@ -20,8 +22,8 @@ interface AssetBreakdownListProps {
  * @param value The number to format
  * @param decimals Number of decimal places (default: 0)
  */
-const formatCurrency = (value: number, decimals: number = 0): string => {
-  return value.toLocaleString('ru-RU', { 
+const formatCurrency = (value: number, language: Language, decimals: number = 0): string => {
+  return value.toLocaleString(language === 'ru' ? 'ru-RU' : 'en-US', {
     minimumFractionDigits: decimals, 
     maximumFractionDigits: decimals 
   });
@@ -34,7 +36,7 @@ const formatCurrency = (value: number, decimals: number = 0): string => {
  * @param totalValue Total portfolio value for calculating absolute amounts
  * @param currency Currency symbol
  */
-const AssetBreakdownItem: React.FC<{ asset: Asset; totalValue: number; currency: string }> = ({ asset, totalValue, currency }) => {
+const AssetBreakdownItem: React.FC<{ asset: Asset; totalValue: number; currency: string; language: Language }> = ({ asset, totalValue, currency, language }) => {
   // Get the Tailwind CSS background color class from the palette using the asset's colorKey.
   const progressBarColorClass = THEME_PALETTE[asset.colorKey].twClass;
   
@@ -58,7 +60,7 @@ const AssetBreakdownItem: React.FC<{ asset: Asset; totalValue: number; currency:
         {/* Asset amount and percentage - responsive layout */}
         <div className="flex flex-col sm:flex-row items-end sm:items-center text-right flex-shrink-0">
           <span className={`${UI_CLASSES.textPrimary} text-sm font-medium whitespace-nowrap`}>
-            {formatCurrency(absoluteAmount)} {currency}
+            {formatCurrency(absoluteAmount, language)} {currency}
           </span>
           <span className={`${UI_CLASSES.textSecondary} text-sm sm:ml-1 whitespace-nowrap`}>
             ({asset.value.toFixed(2)}%)
@@ -69,7 +71,7 @@ const AssetBreakdownItem: React.FC<{ asset: Asset; totalValue: number; currency:
       <div className={`w-full h-2 ${UI_CLASSES.progressTrack} rounded-full overflow-hidden transition-colors duration-300 ease-in-out`} role="progressbar" aria-valuenow={asset.value} aria-valuemin={0} aria-valuemax={100} aria-label={`${asset.name} progress`}>
         {/* The actual progress bar, with its width set dynamically based on the asset's value. */}
         <div 
-          className={`h-full rounded-full ${progressBarColorClass} transition-[width] duration-500 ease-in-out`} 
+          className={`h-full rounded-full ${progressBarColorClass} transition-[width] duration-700 ease-in-out`}
           style={{ width: `${asset.value}%` }}
         ></div>
       </div>
@@ -84,12 +86,12 @@ const AssetBreakdownItem: React.FC<{ asset: Asset; totalValue: number; currency:
  * @param totalValue Total portfolio value
  * @param currency Currency symbol
  */
-const AssetBreakdownList: React.FC<AssetBreakdownListProps> = ({ assets, totalValue, currency }) => {
+const AssetBreakdownList: React.FC<AssetBreakdownListProps> = ({ assets, totalValue, currency, language }) => {
   return (
     <div className="w-full" role="list">
       {/* Sort assets to show the largest holdings first */}
       {assets.sort((a, b) => b.value - a.value).map(asset => (
-        <AssetBreakdownItem key={asset.id} asset={asset} totalValue={totalValue} currency={currency} />
+        <AssetBreakdownItem key={asset.id} asset={asset} totalValue={totalValue} currency={currency} language={language} />
       ))}
     </div>
   );

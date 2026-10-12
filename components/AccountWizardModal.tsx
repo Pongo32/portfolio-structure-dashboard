@@ -4,6 +4,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { UI_CLASSES } from '../constants';
+import { Language, translate } from '../i18n';
 
 // --- Icons ---
 const CloseIcon: React.FC<{ className?: string }> = ({ className }) => (
@@ -32,24 +33,33 @@ const SparklesIcon: React.FC<{ className?: string }> = ({ className }) => (
 
 // --- Types ---
 interface AssetField {
-  id: number;
+  id: string;
   name: string;
   percentage: string;
   amount: string;
 }
 
+const createAssetFieldId = () => {
+  if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) {
+    return `wizard-field-${crypto.randomUUID()}`;
+  }
+
+  return `wizard-field-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+};
+
 interface AccountWizardModalProps {
   isOpen: boolean;
   onClose: () => void;
   onCreate: (data: { accountName: string; fields: { name: string; amount: string }[] }) => void;
+  language: Language;
 }
 
-const AccountWizardModal: React.FC<AccountWizardModalProps> = ({ isOpen, onClose, onCreate }) => {
+const AccountWizardModal: React.FC<AccountWizardModalProps> = ({ isOpen, onClose, onCreate, language }) => {
   // --- State ---
   const [step, setStep] = useState<1 | 2>(1);
   const [accountName, setAccountName] = useState('');
   const [totalAmount, setTotalAmount] = useState('');
-  const [assets, setAssets] = useState<AssetField[]>([{ id: Date.now(), name: '', percentage: '', amount: '' }]);
+  const [assets, setAssets] = useState<AssetField[]>([{ id: createAssetFieldId(), name: '', percentage: '', amount: '' }]);
   const modalRef = useRef<HTMLDivElement>(null);
   const firstInputRef = useRef<HTMLInputElement>(null);
   const isUpdatingRef = useRef(false);
@@ -67,15 +77,15 @@ const AccountWizardModal: React.FC<AccountWizardModalProps> = ({ isOpen, onClose
   const percentageStatus = totalPercentage > 100 ? 'over' : totalPercentage === 100 ? 'complete' : 'under';
 
   // --- Handlers ---
-  const handleAddAsset = () => setAssets([...assets, { id: Date.now(), name: '', percentage: '', amount: '' }]);
+  const handleAddAsset = () => setAssets([...assets, { id: createAssetFieldId(), name: '', percentage: '', amount: '' }]);
   
-  const handleRemoveAsset = (id: number) => {
+  const handleRemoveAsset = (id: string) => {
     if (assets.length > 1) {
       setAssets(assets.filter(asset => asset.id !== id));
     }
   };
   
-  const handleAssetChange = (id: number, field: 'name' | 'percentage' | 'amount', value: string) => {
+  const handleAssetChange = (id: string, field: 'name' | 'percentage' | 'amount', value: string) => {
     if (isUpdatingRef.current) return;
     
     isUpdatingRef.current = true;
@@ -137,7 +147,7 @@ const AccountWizardModal: React.FC<AccountWizardModalProps> = ({ isOpen, onClose
     setStep(1);
     setAccountName('');
     setTotalAmount('');
-    setAssets([{ id: Date.now(), name: '', percentage: '', amount: '' }]);
+    setAssets([{ id: createAssetFieldId(), name: '', percentage: '', amount: '' }]);
   };
 
   // --- Effects ---
@@ -178,12 +188,12 @@ const AccountWizardModal: React.FC<AccountWizardModalProps> = ({ isOpen, onClose
           <div className="flex items-center">
             <SparklesIcon className="w-6 h-6 mr-2 text-sky-500" />
             <h2 id="wizard-title" className={`text-xl font-semibold ${UI_CLASSES.textPrimary}`}>
-              Мастер создания счетов
+              {translate(language, 'Мастер создания счетов', 'Account setup wizard')}
             </h2>
           </div>
           <button
             onClick={onClose}
-            aria-label="Закрыть мастер"
+            aria-label={translate(language, 'Закрыть мастер', 'Close wizard')}
             className={`p-1 rounded-full ${UI_CLASSES.headerButtonIconColor} ${UI_CLASSES.headerButtonHoverBg} transition-colors`}
           >
             <CloseIcon />
@@ -194,10 +204,10 @@ const AccountWizardModal: React.FC<AccountWizardModalProps> = ({ isOpen, onClose
         <div className="mb-6">
           <div className="flex items-center justify-between mb-2">
             <span className={`text-sm font-medium ${step === 1 ? 'text-sky-500' : UI_CLASSES.textSecondary}`}>
-              Шаг 1: Общая сумма
+              {translate(language, 'Шаг 1: Общая сумма', 'Step 1: Total value')}
             </span>
             <span className={`text-sm font-medium ${step === 2 ? 'text-sky-500' : UI_CLASSES.textSecondary}`}>
-              Шаг 2: Распределение активов
+              {translate(language, 'Шаг 2: Распределение активов', 'Step 2: Asset allocation')}
             </span>
           </div>
           <div className="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-2">
@@ -214,7 +224,7 @@ const AccountWizardModal: React.FC<AccountWizardModalProps> = ({ isOpen, onClose
             <div className="space-y-4 animate-fadeIn">
               <div>
                 <label htmlFor="accountName" className="block text-xs font-medium mb-1 text-slate-500 dark:text-slate-300">
-                  Название счета
+                  {translate(language, 'Название счета', 'Account name')}
                 </label>
                 <input
                   ref={firstInputRef}
@@ -222,7 +232,7 @@ const AccountWizardModal: React.FC<AccountWizardModalProps> = ({ isOpen, onClose
                   type="text"
                   value={accountName}
                   onChange={(e) => setAccountName(e.target.value)}
-                  placeholder="Например, Инвестиционный портфель"
+                  placeholder={translate(language, 'Например, Инвестиционный портфель', 'e.g. Investment portfolio')}
                   className={`w-full px-3 py-2 text-sm ${UI_CLASSES.cardBg} text-slate-900 dark:text-white border border-slate-300 dark:border-slate-500 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 transition-colors hover:border-slate-400 dark:hover:border-slate-400 placeholder:text-slate-400 dark:placeholder:text-slate-500`}
                   required
                 />
@@ -230,7 +240,7 @@ const AccountWizardModal: React.FC<AccountWizardModalProps> = ({ isOpen, onClose
 
               <div>
                 <label htmlFor="totalAmount" className="block text-xs font-medium mb-1 text-slate-500 dark:text-slate-300">
-                  Общая сумма вашего портфеля (₽)
+                  {translate(language, 'Общая сумма вашего портфеля (₽)', 'Total portfolio value (₽)')}
                 </label>
                 <input
                   id="totalAmount"
@@ -244,7 +254,7 @@ const AccountWizardModal: React.FC<AccountWizardModalProps> = ({ isOpen, onClose
                   step="any"
                 />
                 <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-                  Эта сумма будет принята за 100%
+                  {translate(language, 'Эта сумма будет принята за 100%', 'This amount will be treated as 100%')}
                 </p>
               </div>
             </div>
@@ -256,25 +266,25 @@ const AccountWizardModal: React.FC<AccountWizardModalProps> = ({ isOpen, onClose
               {/* Total Summary */}
               <div className={`p-3 rounded-lg ${UI_CLASSES.cardBg} border ${percentageStatus === 'over' ? 'border-red-500 bg-red-50 dark:bg-red-900/20' : percentageStatus === 'complete' ? 'border-green-500 bg-green-50 dark:bg-green-900/20' : 'border-slate-300 dark:border-slate-600'}`}>
                 <div className="flex justify-between items-center mb-2">
-                  <span className="text-sm font-medium text-slate-700 dark:text-slate-300">Общая сумма:</span>
+                  <span className="text-sm font-medium text-slate-700 dark:text-slate-300">{translate(language, 'Общая сумма:', 'Total value:')}</span>
                   <span className="text-lg font-bold text-slate-900 dark:text-white">
-                    {totalAmountNum.toLocaleString('ru-RU')} ₽
+                    {totalAmountNum.toLocaleString(language === 'ru' ? 'ru-RU' : 'en-US')} ₽
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-sm font-medium text-slate-700 dark:text-slate-300">Распределено:</span>
+                  <span className="text-sm font-medium text-slate-700 dark:text-slate-300">{translate(language, 'Распределено:', 'Allocated:')}</span>
                   <span className={`text-lg font-bold ${percentageStatus === 'over' ? 'text-red-600 dark:text-red-400' : percentageStatus === 'complete' ? 'text-green-600 dark:text-green-400' : 'text-sky-600 dark:text-sky-400'}`}>
-                    {totalPercentage.toFixed(1)} из 100%
+                    {totalPercentage.toFixed(1)} / 100%
                   </span>
                 </div>
                 {percentageStatus === 'over' && (
                   <p className="mt-2 text-xs text-red-600 dark:text-red-400">
-                    ⚠️ Превышение! Сумма процентов не должна быть больше 100%
+                    {translate(language, '⚠️ Превышение! Сумма процентов не должна быть больше 100%', '⚠️ Over limit! The allocation cannot exceed 100%.')}
                   </p>
                 )}
                 {percentageStatus === 'under' && totalPercentage > 0 && (
                   <p className="mt-2 text-xs text-slate-600 dark:text-slate-400">
-                    💡 Осталось распределить: {(100 - totalPercentage).toFixed(1)}%
+                    💡 {translate(language, 'Осталось распределить:', 'Remaining to allocate:')} {(100 - totalPercentage).toFixed(1)}%
                   </p>
                 )}
               </div>
@@ -289,14 +299,14 @@ const AccountWizardModal: React.FC<AccountWizardModalProps> = ({ isOpen, onClose
                       <div className="flex-grow space-y-2">
                         <div>
                           <label htmlFor={`asset-name-${asset.id}`} className="block text-xs font-medium mb-1 text-slate-500 dark:text-slate-300">
-                            Актив {index + 1}
+                            {translate(language, 'Актив', 'Asset')} {index + 1}
                           </label>
                           <input
                             id={`asset-name-${asset.id}`}
                             type="text"
                             value={asset.name}
                             onChange={(e) => handleAssetChange(asset.id, 'name', e.target.value)}
-                            placeholder="Фонд на акции США"
+                            placeholder={translate(language, 'Фонд на акции США', 'US stock fund')}
                             className={`w-full px-2.5 py-1.5 text-sm ${UI_CLASSES.cardBg} text-slate-900 dark:text-white border border-slate-300 dark:border-slate-500 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 transition-colors hover:border-slate-400 dark:hover:border-slate-400 placeholder:text-slate-400 dark:placeholder:text-slate-500`}
                             required
                           />
@@ -304,7 +314,7 @@ const AccountWizardModal: React.FC<AccountWizardModalProps> = ({ isOpen, onClose
                         <div className="flex gap-2">
                           <div className="flex-1">
                             <label htmlFor={`asset-percentage-${asset.id}`} className="block text-xs font-medium mb-1 text-slate-500 dark:text-slate-300">
-                              Доля (%)
+                              {translate(language, 'Доля (%)', 'Allocation (%)')}
                             </label>
                             <input
                               id={`asset-percentage-${asset.id}`}
@@ -321,7 +331,7 @@ const AccountWizardModal: React.FC<AccountWizardModalProps> = ({ isOpen, onClose
                           </div>
                           <div className="flex-1">
                             <label htmlFor={`asset-amount-${asset.id}`} className="block text-xs font-medium mb-1 text-slate-500 dark:text-slate-300">
-                              Сумма (₽)
+                              {translate(language, 'Сумма (₽)', 'Amount (₽)')}
                             </label>
                             <input
                               id={`asset-amount-${asset.id}`}
@@ -340,7 +350,7 @@ const AccountWizardModal: React.FC<AccountWizardModalProps> = ({ isOpen, onClose
                       <button
                         type="button"
                         onClick={() => handleRemoveAsset(asset.id)}
-                        aria-label="Удалить актив"
+                        aria-label={translate(language, 'Удалить актив', 'Remove asset')}
                         className={`p-2 h-[38px] text-red-500 bg-slate-100 dark:bg-slate-700 hover:bg-red-100 dark:hover:bg-red-900/50 rounded-md transition-colors ${assets.length > 1 ? 'opacity-100' : 'opacity-50 cursor-not-allowed'}`}
                         disabled={assets.length <= 1}
                       >
@@ -358,7 +368,7 @@ const AccountWizardModal: React.FC<AccountWizardModalProps> = ({ isOpen, onClose
                 className={`inline-flex items-center px-3 py-1.5 text-sm font-medium rounded-lg border border-slate-400 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:border-sky-500 dark:hover:border-sky-400 hover:text-sky-600 dark:hover:text-sky-400 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-500 dark:focus:ring-offset-slate-800`}
               >
                 <PlusIcon className="w-5 h-5 mr-1" />
-                Добавить актив
+                {translate(language, 'Добавить актив', 'Add asset')}
               </button>
             </div>
           )}
@@ -372,7 +382,7 @@ const AccountWizardModal: React.FC<AccountWizardModalProps> = ({ isOpen, onClose
                   onClick={onClose}
                   className={`px-4 py-2 text-sm font-semibold ${UI_CLASSES.textPrimary} bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 rounded-lg transition-colors`}
                 >
-                  Отмена
+                  {translate(language, 'Отмена', 'Cancel')}
                 </button>
                 <button
                   type="button"
@@ -380,7 +390,7 @@ const AccountWizardModal: React.FC<AccountWizardModalProps> = ({ isOpen, onClose
                   disabled={!isStep1Valid}
                   className={`px-6 py-2 text-sm font-semibold text-white ${UI_CLASSES.actionButton} rounded-lg shadow-md hover:shadow-lg transition-all duration-200 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none`}
                 >
-                  Далее →
+                  {translate(language, 'Далее', 'Next')} →
                 </button>
               </>
             ) : (
@@ -390,14 +400,14 @@ const AccountWizardModal: React.FC<AccountWizardModalProps> = ({ isOpen, onClose
                   onClick={handleBack}
                   className={`px-4 py-2 text-sm font-semibold ${UI_CLASSES.textPrimary} bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 rounded-lg transition-colors`}
                 >
-                  ← Назад
+                  ← {translate(language, 'Назад', 'Back')}
                 </button>
                 <button
                   type="submit"
                   disabled={!isStep2Valid}
                   className={`px-6 py-2 text-sm font-semibold text-white ${UI_CLASSES.actionButton} rounded-lg shadow-md hover:shadow-lg transition-all duration-200 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none`}
                 >
-                  Создать счет
+                  {translate(language, 'Создать счет', 'Create account')}
                 </button>
               </>
             )}

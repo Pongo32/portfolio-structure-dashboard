@@ -6,24 +6,26 @@ import React from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
 import { AccountData } from '../types';
 import { UI_CLASSES } from '../constants';
+import { Language } from '../i18n';
 
 /**
  * Props for the DonutChartComponent.
  */
 interface DonutChartComponentProps {
   data: AccountData; // The account data containing assets and total value
+  language: Language;
 }
 
-const DonutChartComponent: React.FC<DonutChartComponentProps> = ({ data }) => {
+const DonutChartComponent: React.FC<DonutChartComponentProps> = ({ data, language }) => {
   // Format the asset data to be compatible with the recharts Pie component
   const chartData = data.assets.map(asset => ({ name: asset.name, value: asset.value, color: asset.color }));
 
   return (
     // The container is relative to position the total value text in the center.
     // It has a responsive height.
-    <div className="relative w-full h-64 sm:h-72">
+    <div className="portfolio-donut-chart relative w-full h-64 sm:h-72">
       {/* ResponsiveContainer makes the chart adapt to the parent container's size */}
-      <ResponsiveContainer width="100%" height="100%">
+      <ResponsiveContainer width="100%" height="100%" className="outline-none focus:outline-none">
         <PieChart>
           <Pie
             data={chartData}
@@ -37,7 +39,10 @@ const DonutChartComponent: React.FC<DonutChartComponentProps> = ({ data }) => {
             nameKey="name" // The key for the name/label
             stroke="none" // No border around slices
             isAnimationActive={true} // Enable the initial render animation
-            animationDuration={800}
+            animationDuration={1400}
+            animationEasing="ease-in-out"
+            rootTabIndex={-1}
+            className="outline-none focus:outline-none"
           >
             {/* Map over the data to create a <Cell> for each slice. 
                 This allows individual styling (e.g., color) for each segment. */}
@@ -51,11 +56,12 @@ const DonutChartComponent: React.FC<DonutChartComponentProps> = ({ data }) => {
       {/* This div is absolutely positioned to overlay text in the center of the donut chart. */}
       <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none text-center">
         <p className={`text-2xl sm:text-3xl md:text-4xl font-bold ${UI_CLASSES.textPrimary}`}>
-          {/* Format the total value to a Russian locale string with 2 decimal places */}
-          {data.totalValue.toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {data.currency}
+          {data.totalValue.toLocaleString(language === 'ru' ? 'ru-RU' : 'en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {data.currency}
         </p>
         <p className={`${UI_CLASSES.textSecondary} text-sm md:text-base mt-1`}>
-          {data.assetCount} актива
+          {language === 'en'
+            ? `${data.assetCount} ${data.assetCount === 1 ? 'asset' : 'assets'}`
+            : `${data.assetCount} ${data.assetCount % 10 === 1 && data.assetCount % 100 !== 11 ? 'актив' : data.assetCount % 10 >= 2 && data.assetCount % 10 <= 4 && (data.assetCount % 100 < 12 || data.assetCount % 100 > 14) ? 'актива' : 'активов'}`}
         </p>
       </div>
     </div>

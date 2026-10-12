@@ -5,6 +5,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { UI_CLASSES } from '../constants';
 import { Account } from '../types';
+import { Language, translate } from '../i18n';
 
 type Theme = 'light' | 'dark';
 
@@ -23,6 +24,9 @@ interface HeaderProps {
   onDeleteAccount: (id: string) => void;
   onEditAccount: (id: string) => void;
   onNavigateToSettings: () => void;
+  onNavigateToGeneralSettings: () => void;
+  onNavigateToOtherSettings: () => void;
+  language: Language;
 }
 
 // --- Reusable SVG Icon Components ---
@@ -88,10 +92,22 @@ const SparklesIcon: React.FC<{ className?: string }> = ({ className }) => (
   </svg>
 );
 
-const Cog6ToothIcon: React.FC<{ className?: string }> = ({ className }) => (
-  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className || "w-6 h-6"}>
-    <path strokeLinecap="round" strokeLinejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.438.995s.145.755.438.995l1.003.827c.424.35.534.954.26 1.431l-1.296 2.247a1.125 1.125 0 01-1.37.49l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.063-.374-.313-.686-.645-.87a6.52 6.52 0 01-.22-.127c-.324-.196-.72-.257-1.075-.124l-1.217.456a1.125 1.125 0 01-1.37-.49l-1.296-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.437-.995s-.145-.755-.437-.995l-1.004-.827a1.125 1.125 0 01-.26-1.431l1.296-2.247a1.125 1.125 0 011.37-.49l1.217.456c.355.133.75.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281z" />
-    <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+const RebalanceIcon: React.FC<{ className?: string }> = ({ className }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.7" stroke="currentColor" className={className || 'w-5 h-5'}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M7 7h10m0 0l-3-3m3 3l-3 3M17 17H7m0 0l3 3m-3-3l3-3" />
+  </svg>
+);
+
+const NameGroupsIcon: React.FC<{ className?: string }> = ({ className }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.7" stroke="currentColor" className={className || 'w-5 h-5'}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M9.5 14.5l5-5m-7.25 7.25l-1 1a3.18 3.18 0 01-4.5-4.5l4-4a3.18 3.18 0 014.5 0m2.5 1.5l1-1a3.18 3.18 0 014.5 4.5l-4 4a3.18 3.18 0 01-4.5 0" transform="translate(2 -2)" />
+  </svg>
+);
+
+const OtherSettingsIcon: React.FC<{ className?: string }> = ({ className }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.7" stroke="currentColor" className={className || 'w-5 h-5'}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M4 7h16M4 12h16M4 17h16" />
+    <path strokeLinecap="round" strokeLinejoin="round" d="M9 7v0m6 5v0m-3 5v0" strokeWidth="3.5" />
   </svg>
 );
 
@@ -101,12 +117,15 @@ interface SidebarProps {
   isOpen: boolean;
   onClose: () => void;
   onNavigateToSettings: () => void;
+  onNavigateToGeneralSettings: () => void;
+  onNavigateToOtherSettings: () => void;
+  language: Language;
 }
 
 /**
  * A slide-out sidebar menu for navigation and additional actions.
  */
-const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, onNavigateToSettings }) => {
+const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, onNavigateToSettings, onNavigateToGeneralSettings, onNavigateToOtherSettings, language }) => {
   // Effect to handle 'Escape' key press and body scroll lock
   useEffect(() => {
     const handleEscKey = (event: KeyboardEvent) => {
@@ -143,9 +162,9 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, onNavigateToSettings
       >
         <div className="flex flex-col h-full">
           <header className={`p-4 flex justify-between items-center border-b border-slate-200 dark:border-slate-700`}>
-            <h2 id="sidebar-title" className="text-lg font-semibold">Меню</h2>
+            <h2 id="sidebar-title" className="text-lg font-semibold">{translate(language, 'Меню', 'Menu')}</h2>
             <button 
-              aria-label="Закрыть меню" 
+              aria-label={translate(language, 'Закрыть меню', 'Close menu')}
               onClick={onClose}
               className={`${UI_CLASSES.headerButtonIconColor} ${UI_CLASSES.headerButtonHoverBg} p-2 rounded-md transition-colors`}
             >
@@ -153,13 +172,27 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, onNavigateToSettings
             </button>
           </header>
           <nav className="flex-grow p-4 space-y-2">
-            <button onClick={onNavigateToSettings} className={`w-full flex items-center px-3 py-2 text-left rounded-md ${UI_CLASSES.headerButtonHoverBg} hover:translate-x-1 transform transition-all duration-200 ease-in-out`}>
-              <Cog6ToothIcon className={`w-5 h-5 mr-3 ${UI_CLASSES.textSecondary}`} />
-              Настройки ребалансировки
+            <button onClick={onNavigateToSettings} className={`w-full min-h-12 flex items-center gap-3 px-3 py-2 text-left text-sm sm:text-base font-medium leading-5 rounded-lg ${UI_CLASSES.headerButtonHoverBg} focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 transition-colors`}>
+              <span className="w-9 h-9 shrink-0 grid place-items-center rounded-xl bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-300">
+                <RebalanceIcon className="w-5 h-5" />
+              </span>
+              <span>{translate(language, 'Настройки ребалансировки', 'Rebalancing settings')}</span>
+            </button>
+            <button onClick={onNavigateToGeneralSettings} className={`w-full min-h-12 flex items-center gap-3 px-3 py-2 text-left text-sm sm:text-base font-medium leading-5 rounded-lg ${UI_CLASSES.headerButtonHoverBg} focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 transition-colors`}>
+              <span className="w-9 h-9 shrink-0 grid place-items-center rounded-xl bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300">
+                <NameGroupsIcon className="w-5 h-5" />
+              </span>
+              <span>{translate(language, 'Настройки группы названий и синонимов', 'Name groups and aliases')}</span>
+            </button>
+            <button onClick={onNavigateToOtherSettings} className={`w-full min-h-12 flex items-center gap-3 px-3 py-2 text-left text-sm sm:text-base font-medium leading-5 rounded-lg ${UI_CLASSES.headerButtonHoverBg} focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 transition-colors`}>
+              <span className="w-9 h-9 shrink-0 grid place-items-center rounded-xl bg-violet-100 text-violet-700 dark:bg-violet-500/20 dark:text-violet-300">
+                <OtherSettingsIcon className="w-5 h-5" />
+              </span>
+              <span>{translate(language, 'Прочие настройки', 'Other settings')}</span>
             </button>
           </nav>
           <footer className={`p-4 mt-auto border-t border-slate-200 dark:border-slate-700`}>
-            <p className={`${UI_CLASSES.textSecondary} text-xs`}>Версия 1.0.0</p>
+            <p className={`${UI_CLASSES.textSecondary} text-xs`}>{translate(language, 'Версия 1.0.0', 'Version 1.0.0')}</p>
           </footer>
         </div>
       </div>
@@ -169,7 +202,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, onNavigateToSettings
 
 // --- Main Header Component ---
 
-const Header: React.FC<HeaderProps> = ({ currentTheme, toggleTheme, onOpenCreateAccountModal, onOpenAccountWizard, accounts, selectedAccountId, onSelectAccount, onDeleteAccount, onEditAccount, onNavigateToSettings }) => {
+const Header: React.FC<HeaderProps> = ({ currentTheme, toggleTheme, onOpenCreateAccountModal, onOpenAccountWizard, accounts, selectedAccountId, onSelectAccount, onDeleteAccount, onEditAccount, onNavigateToSettings, onNavigateToGeneralSettings, onNavigateToOtherSettings, language }) => {
   // State for controlling UI elements within the header
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isAccountDropdownOpen, setIsAccountDropdownOpen] = useState(false);
@@ -184,6 +217,16 @@ const Header: React.FC<HeaderProps> = ({ currentTheme, toggleTheme, onOpenCreate
   const handleNavigateToSettings = () => {
     toggleSidebar();
     onNavigateToSettings();
+  };
+
+  const handleNavigateToGeneralSettings = () => {
+    toggleSidebar();
+    onNavigateToGeneralSettings();
+  };
+
+  const handleNavigateToOtherSettings = () => {
+    toggleSidebar();
+    onNavigateToOtherSettings();
   };
 
   const toggleAccountDropdown = () => setIsAccountDropdownOpen(prev => !prev);
@@ -230,8 +273,8 @@ const Header: React.FC<HeaderProps> = ({ currentTheme, toggleTheme, onOpenCreate
   
   // Determine the name to display on the account selection button
   const selectedAccountName = selectedAccountId === 'all' 
-    ? 'Все счета' 
-    : accounts.find(acc => acc.id === selectedAccountId)?.name || 'Выберите счет';
+    ? translate(language, 'Все счета', 'All accounts')
+    : accounts.find(acc => acc.id === selectedAccountId)?.name || translate(language, 'Выберите счет', 'Select an account');
     
   // Disable edit/delete actions if 'All Accounts' is selected
   const isActionDisabled = selectedAccountId === 'all';
@@ -241,7 +284,7 @@ const Header: React.FC<HeaderProps> = ({ currentTheme, toggleTheme, onOpenCreate
       <header className={`p-4 flex items-center ${UI_CLASSES.headerBg} shadow-md sticky top-0 z-30 transition-colors duration-300 ease-in-out`}>
         {/* Burger Menu Button */}
         <button 
-          aria-label="Открыть меню" 
+          aria-label={translate(language, 'Открыть меню', 'Open menu')}
           onClick={toggleSidebar}
           className={`${UI_CLASSES.headerButtonIconColor} ${UI_CLASSES.headerButtonHoverBg} p-2 rounded-md transition-colors`}
         >
@@ -275,7 +318,7 @@ const Header: React.FC<HeaderProps> = ({ currentTheme, toggleTheme, onOpenCreate
                 role="menuitem"
               >
                 <ListBulletIcon className={`w-5 h-5 mr-3 ${UI_CLASSES.textSecondary}`} />
-                Все счета
+                {translate(language, 'Все счета', 'All accounts')}
               </button>
               {/* List all available accounts */}
               {accounts.map(account => (
@@ -297,7 +340,7 @@ const Header: React.FC<HeaderProps> = ({ currentTheme, toggleTheme, onOpenCreate
                 role="menuitem"
               >
                 <SparklesIcon className={`w-5 h-5 mr-3 ${UI_CLASSES.textSecondary}`} />
-                Мастер создания счетов
+                {translate(language, 'Мастер создания счетов', 'Account wizard')}
               </button>
               <button
                 onClick={() => handleAction('Create')}
@@ -305,7 +348,7 @@ const Header: React.FC<HeaderProps> = ({ currentTheme, toggleTheme, onOpenCreate
                 role="menuitem"
               >
                 <PlusIcon className={`w-5 h-5 mr-3 ${UI_CLASSES.textSecondary}`} />
-                Создать счет
+                {translate(language, 'Создать счет', 'Create account')}
               </button>
               <button
                 onClick={() => handleAction('Edit')}
@@ -314,7 +357,7 @@ const Header: React.FC<HeaderProps> = ({ currentTheme, toggleTheme, onOpenCreate
                 role="menuitem"
               >
                 <PencilIcon className={`w-5 h-5 mr-3 ${UI_CLASSES.textSecondary}`} />
-                Редактировать счет
+                {translate(language, 'Редактировать счет', 'Edit account')}
               </button>
               <button
                 onClick={() => handleAction('Delete')}
@@ -323,7 +366,7 @@ const Header: React.FC<HeaderProps> = ({ currentTheme, toggleTheme, onOpenCreate
                 role="menuitem"
               >
                 <TrashIcon className="w-5 h-5 mr-3" />
-                Удалить счет
+                {translate(language, 'Удалить счет', 'Delete account')}
               </button>
             </div>
           )}
@@ -331,7 +374,7 @@ const Header: React.FC<HeaderProps> = ({ currentTheme, toggleTheme, onOpenCreate
         
         {/* Theme Toggle Button */}
         <button 
-          aria-label="Переключить тему" 
+          aria-label={translate(language, 'Переключить тему', 'Toggle theme')}
           onClick={toggleTheme}
           className={`${UI_CLASSES.headerButtonIconColor} ${UI_CLASSES.headerButtonHoverBg} p-2 rounded-md transition-colors`}
         >
@@ -339,7 +382,14 @@ const Header: React.FC<HeaderProps> = ({ currentTheme, toggleTheme, onOpenCreate
         </button>
       </header>
       {/* Sidebar component is rendered here but visibility is controlled by state */}
-      <Sidebar isOpen={isSidebarOpen} onClose={toggleSidebar} onNavigateToSettings={handleNavigateToSettings} />
+      <Sidebar
+        isOpen={isSidebarOpen}
+        onClose={toggleSidebar}
+        onNavigateToSettings={handleNavigateToSettings}
+        onNavigateToGeneralSettings={handleNavigateToGeneralSettings}
+        onNavigateToOtherSettings={handleNavigateToOtherSettings}
+        language={language}
+      />
     </>
   );
 };

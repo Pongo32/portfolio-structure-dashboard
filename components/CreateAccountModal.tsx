@@ -5,6 +5,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { UI_CLASSES } from '../constants';
 import { Account } from '../types';
+import { Language, translate } from '../i18n';
 
 // --- Icons ---
 const CloseIcon: React.FC<{ className?: string }> = ({ className }) => (
@@ -28,10 +29,18 @@ const TrashIcon: React.FC<{ className?: string }> = ({ className }) => (
 // --- Component ---
 // Defines the structure for a single dynamic field in the form.
 interface Field {
-  id: number; // Unique ID for React's key prop
+  id: string; // Unique ID for React's key prop
   name: string;
   amount: string;
 }
+
+const createFieldId = () => {
+  if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) {
+    return `field-${crypto.randomUUID()}`;
+  }
+
+  return `field-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+};
 
 /**
  * Props for the CreateAccountModal component.
@@ -42,12 +51,13 @@ interface CreateAccountModalProps {
   onCreate: (data: { accountName: string; fields: { name: string; amount: string }[] }) => void; // Callback for creating an account
   onUpdate: (data: { accountId: string; accountName: string; fields: { name: string; amount: string }[] }) => void; // Callback for updating an account
   accountToEdit?: Account | null; // The account data to pre-fill the form for editing
+  language: Language;
 }
 
-const CreateAccountModal: React.FC<CreateAccountModalProps> = ({ isOpen, onClose, onCreate, onUpdate, accountToEdit }) => {
+const CreateAccountModal: React.FC<CreateAccountModalProps> = ({ isOpen, onClose, onCreate, onUpdate, accountToEdit, language }) => {
   // --- State ---
   const [accountName, setAccountName] = useState('');
-  const [fields, setFields] = useState<Field[]>([{ id: Date.now(), name: '', amount: '' }]);
+  const [fields, setFields] = useState<Field[]>([{ id: createFieldId(), name: '', amount: '' }]);
   const modalRef = useRef<HTMLDivElement>(null);
   const firstInputRef = useRef<HTMLInputElement>(null); // Ref to focus the first input when the modal opens
   const prevFieldsLength = useRef(1); // To track when a new field is added
@@ -57,15 +67,15 @@ const CreateAccountModal: React.FC<CreateAccountModalProps> = ({ isOpen, onClose
   const isFormValid = accountName.trim() !== '' && fields.every(f => f.name.trim() !== '' && f.amount.trim() !== '' && !isNaN(parseFloat(f.amount)) && parseFloat(f.amount) >= 0);
 
   // --- Handlers ---
-  const handleAddField = () => setFields([...fields, { id: Date.now(), name: '', amount: '' }]);
-  const handleRemoveField = (id: number) => setFields(fields.filter(field => field.id !== id));
-  const handleFieldChange = (id: number, key: 'name' | 'amount', value: string) => {
+  const handleAddField = () => setFields([...fields, { id: createFieldId(), name: '', amount: '' }]);
+  const handleRemoveField = (id: string) => setFields(fields.filter(field => field.id !== id));
+  const handleFieldChange = (id: string, key: 'name' | 'amount', value: string) => {
     setFields(fields.map(field => field.id === id ? { ...field, [key]: value } : field));
   };
   
   const resetForm = () => {
     setAccountName('');
-    setFields([{ id: Date.now(), name: '', amount: '' }]);
+    setFields([{ id: createFieldId(), name: '', amount: '' }]);
   }
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -88,7 +98,7 @@ const CreateAccountModal: React.FC<CreateAccountModalProps> = ({ isOpen, onClose
       if (accountToEdit) { // Edit mode
         setAccountName(accountToEdit.name);
         setFields(accountToEdit.data.assets.map((asset, index) => ({
-          id: Date.now() + index,
+          id: `${index}-${createFieldId()}`,
           name: asset.name,
           amount: asset.amount.toString(),
         })));
@@ -140,22 +150,22 @@ const CreateAccountModal: React.FC<CreateAccountModalProps> = ({ isOpen, onClose
         aria-labelledby="create-account-title"
       >
         <header className="flex items-start justify-between mb-4">
-          <h2 id="create-account-title" className={`text-xl font-semibold ${UI_CLASSES.textPrimary}`}>{isEditMode ? 'Редактировать счет' : 'Создать новый счет'}</h2>
-          <button onClick={onClose} aria-label="Закрыть модальное окно" className={`p-1 rounded-full ${UI_CLASSES.headerButtonIconColor} ${UI_CLASSES.headerButtonHoverBg} transition-colors`}>
+          <h2 id="create-account-title" className={`text-xl font-semibold ${UI_CLASSES.textPrimary}`}>{isEditMode ? translate(language, 'Редактировать счет', 'Edit account') : translate(language, 'Создать новый счет', 'Create account')}</h2>
+          <button onClick={onClose}           aria-label={translate(language, 'Закрыть модальное окно', 'Close dialog')} className={`p-1 rounded-full ${UI_CLASSES.headerButtonIconColor} ${UI_CLASSES.headerButtonHoverBg} transition-colors`}>
             <CloseIcon />
           </button>
         </header>
         
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label htmlFor="accountName" className={`block text-xs font-medium mb-1 text-slate-500 dark:text-slate-300`}>Название счета</label>
+            <label htmlFor="accountName" className={`block text-xs font-medium mb-1 text-slate-500 dark:text-slate-300`}>{translate(language, 'Название счета', 'Account name')}</label>
             <input
               ref={firstInputRef}
               id="accountName"
               type="text"
               value={accountName}
               onChange={(e) => setAccountName(e.target.value)}
-              placeholder="Например, мой брокерский счет"
+              placeholder={translate(language, 'Например, мой брокерский счет', 'e.g. My brokerage account')}
               className={`w-full px-2.5 py-1.5 text-sm ${UI_CLASSES.cardBg} text-slate-900 dark:text-white border border-slate-300 dark:border-slate-500 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 transition-colors hover:border-slate-400 dark:hover:border-slate-400 placeholder:text-slate-400 dark:placeholder:text-slate-500`}
               required
             />
@@ -167,20 +177,20 @@ const CreateAccountModal: React.FC<CreateAccountModalProps> = ({ isOpen, onClose
               <div key={field.id} className="flex flex-col sm:flex-row sm:items-end sm:space-x-2 space-y-2 sm:space-y-0">
                 {/* Asset Name Field */}
                 <div className="flex-grow">
-                  <label htmlFor={`field-name-${field.id}`} className={`block text-xs font-medium mb-1 text-slate-500 dark:text-slate-300`}>Название {index + 1}</label>
+                  <label htmlFor={`field-name-${field.id}`} className={`block text-xs font-medium mb-1 text-slate-500 dark:text-slate-300`}>{translate(language, 'Название', 'Name')} {index + 1}</label>
                   <input
                     id={`field-name-${field.id}`}
                     type="text"
                     value={field.name}
                     onChange={(e) => handleFieldChange(field.id, 'name', e.target.value)}
-                    placeholder="Акция, облигация..."
+                    placeholder={translate(language, 'Акция, облигация...', 'Stock, bond...')}
                     className={`w-full px-2.5 py-1.5 text-sm ${UI_CLASSES.cardBg} text-slate-900 dark:text-white border border-slate-300 dark:border-slate-500 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 transition-colors hover:border-slate-400 dark:hover:border-slate-400 placeholder:text-slate-400 dark:placeholder:text-slate-500`}
                     required
                   />
                 </div>
                 {/* Asset Amount Field */}
                 <div className="w-full sm:w-1/3">
-                   <label htmlFor={`field-amount-${field.id}`} className={`block text-xs font-medium mb-1 text-slate-500 dark:text-slate-300`}>Сумма</label>
+                   <label htmlFor={`field-amount-${field.id}`} className={`block text-xs font-medium mb-1 text-slate-500 dark:text-slate-300`}>{translate(language, 'Сумма', 'Amount')}</label>
                   <input
                     id={`field-amount-${field.id}`}
                     type="number"
@@ -197,7 +207,7 @@ const CreateAccountModal: React.FC<CreateAccountModalProps> = ({ isOpen, onClose
                 <button
                   type="button"
                   onClick={() => handleRemoveField(field.id)}
-                  aria-label="Удалить поле"
+                  aria-label={translate(language, 'Удалить поле', 'Remove field')}
                   className={`p-2 h-[38px] text-red-500 bg-slate-100 dark:bg-slate-700 hover:bg-red-100 dark:hover:bg-red-900/50 rounded-md transition-colors ${fields.length > 1 ? 'opacity-100' : 'opacity-50 cursor-not-allowed'}`}
                   disabled={fields.length <= 1}
                 >
@@ -214,16 +224,16 @@ const CreateAccountModal: React.FC<CreateAccountModalProps> = ({ isOpen, onClose
             className={`inline-flex items-center px-3 py-1.5 text-sm font-medium rounded-lg border border-slate-400 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:border-sky-500 dark:hover:border-sky-400 hover:text-sky-600 dark:hover:text-sky-400 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-500 dark:focus:ring-offset-slate-800`}
           >
             <PlusIcon className="w-5 h-5 mr-1" />
-            Добавить поле
+            {translate(language, 'Добавить поле', 'Add field')}
           </button>
           
           {/* Modal Footer with Actions */}
           <footer className="flex justify-end space-x-3 pt-2">
             <button type="button" onClick={onClose} className={`px-4 py-2 text-sm font-semibold ${UI_CLASSES.textPrimary} bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 rounded-lg transition-colors`}>
-              Отмена
+              {translate(language, 'Отмена', 'Cancel')}
             </button>
             <button type="submit" disabled={!isFormValid} className={`px-6 py-2 text-sm font-semibold text-white ${UI_CLASSES.actionButton} rounded-lg shadow-md hover:shadow-lg transition-all duration-200 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none`}>
-              {isEditMode ? 'Сохранить изменения' : 'Создать'}
+              {isEditMode ? translate(language, 'Сохранить изменения', 'Save changes') : translate(language, 'Создать', 'Create')}
             </button>
           </footer>
         </form>

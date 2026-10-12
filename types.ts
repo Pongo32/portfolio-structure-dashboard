@@ -38,6 +38,11 @@ export interface Account {
   data: AccountData; // The financial data associated with this account
 }
 
+export interface AssetAliasGroup {
+  canonicalName: string;
+  aliases: string[];
+}
+
 /**
  * Represents a single rebalancing suggestion.
  */

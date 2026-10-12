@@ -5,6 +5,7 @@
 import React from 'react';
 import { RebalanceSuggestion } from '../types';
 import { UI_CLASSES } from '../constants';
+import { Language, translate } from '../i18n';
 
 // --- Icons ---
 // Icon to indicate an asset's allocation should be increased.
@@ -26,14 +27,15 @@ const TrendingDownIcon: React.FC<{ className?: string }> = ({ className }) => (
 interface RebalanceSuggestionsListProps {
     suggestions: RebalanceSuggestion[];
     currency: string;
+    language: Language;
 }
 
-const RebalanceSuggestionsList: React.FC<RebalanceSuggestionsListProps> = ({ suggestions, currency }) => {
+const RebalanceSuggestionsList: React.FC<RebalanceSuggestionsListProps> = ({ suggestions, currency, language }) => {
     // If there are no suggestions, display a message indicating the portfolio is balanced.
     if (suggestions.length === 0) {
         return (
             <div className="w-full mt-6 pt-4 border-t border-slate-200 dark:border-slate-700 text-center">
-                <p className={`${UI_CLASSES.textSecondary} text-sm`}>Портфель сбалансирован. Нет рекомендаций.</p>
+                <p className={`${UI_CLASSES.textSecondary} text-sm`}>{translate(language, 'Портфель сбалансирован. Нет рекомендаций.', 'Portfolio is balanced. No recommendations.')}</p>
             </div>
         );
     }
@@ -41,7 +43,7 @@ const RebalanceSuggestionsList: React.FC<RebalanceSuggestionsListProps> = ({ sug
     // Otherwise, display the list of suggestions.
     return (
         <div className="w-full mt-6 pt-4 border-t border-slate-200 dark:border-slate-700">
-            <h3 className={`text-md font-semibold mb-4 text-center ${UI_CLASSES.textSecondary}`}>Рекомендации по ребалансировке</h3>
+            <h3 className={`text-md font-semibold mb-4 text-center ${UI_CLASSES.textSecondary}`}>{translate(language, 'Рекомендации по ребалансировке', 'Rebalancing recommendations')}</h3>
             <div className="space-y-2">
                 {suggestions.map((s) => {
                     // Determine styling based on whether the action is 'Increase' or 'Decrease'.
@@ -60,8 +62,10 @@ const RebalanceSuggestionsList: React.FC<RebalanceSuggestionsListProps> = ({ sug
                             </div>
                             {/* Right side: Action and Amount */}
                             <div className={`font-semibold text-sm ${textColor} w-full sm:w-auto text-left sm:text-right`}>
-                                <span>{isIncrease ? 'Увеличить на' : 'Уменьшить на'} </span>
-                                <span>{s.amount.toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {currency}</span>
+                                <span>{isIncrease
+                                  ? translate(language, 'Увеличить на', 'Increase by')
+                                  : translate(language, 'Уменьшить на', 'Decrease by')} </span>
+                                <span>{s.amount.toLocaleString(language === 'ru' ? 'ru-RU' : 'en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {currency}</span>
                             </div>
                         </div>
                     );

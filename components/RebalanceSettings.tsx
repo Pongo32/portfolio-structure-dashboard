@@ -5,6 +5,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { UI_CLASSES } from '../constants';
 import { Asset } from '../types';
+import { Language, translate } from '../i18n';
 
 // --- Icon ---
 const ArrowLeftIcon: React.FC<{ className?: string }> = ({ className }) => (
@@ -21,9 +22,10 @@ interface RebalanceSettingsProps {
   currentTargets: { [key: string]: number }; // The currently saved target percentages
   onSave: (targets: { [key: string]: number }) => void; // Callback to save the new targets
   onBack: () => void; // Callback to navigate back to the portfolio view
+  language: Language;
 }
 
-const RebalanceSettings: React.FC<RebalanceSettingsProps> = ({ allAssets, currentTargets, onSave, onBack }) => {
+const RebalanceSettings: React.FC<RebalanceSettingsProps> = ({ allAssets, currentTargets, onSave, onBack, language }) => {
     // Memoize the list of unique assets to avoid re-computation.
     const uniqueAssets = useMemo(() => {
         const seen = new Set<string>();
@@ -77,10 +79,10 @@ const RebalanceSettings: React.FC<RebalanceSettingsProps> = ({ allAssets, curren
         <div className={`min-h-screen ${UI_CLASSES.appBg} ${UI_CLASSES.textPrimary} flex flex-col font-sans transition-colors duration-300 ease-in-out`}>
             {/* Header for the settings page */}
             <header className={`p-4 flex justify-between items-center ${UI_CLASSES.headerBg} shadow-md sticky top-0 z-30`}>
-                <button onClick={onBack} aria-label="Вернуться назад" className={`${UI_CLASSES.headerButtonIconColor} ${UI_CLASSES.headerButtonHoverBg} p-2 rounded-md`}>
+                <button onClick={onBack} aria-label={translate(language, 'Вернуться назад', 'Go back')} className={`${UI_CLASSES.headerButtonIconColor} ${UI_CLASSES.headerButtonHoverBg} p-2 rounded-md`}>
                     <ArrowLeftIcon />
                 </button>
-                <h1 className="text-lg font-semibold">Настройки ребалансировки</h1>
+                <h1 className="text-lg font-semibold">{translate(language, 'Настройки ребалансировки', 'Rebalancing settings')}</h1>
                 <div className="w-11" aria-hidden="true"></div> {/* Spacer to center the title */}
             </header>
 
@@ -88,7 +90,7 @@ const RebalanceSettings: React.FC<RebalanceSettingsProps> = ({ allAssets, curren
             <main className="flex-grow container mx-auto px-4 py-8 flex flex-col items-center">
                 <div className={`w-full max-w-md md:max-w-2xl ${UI_CLASSES.cardBg} p-4 sm:p-6 rounded-xl shadow-xl`}>
                     <p className={`${UI_CLASSES.textSecondary} mb-6 text-sm`}>
-                        Укажите целевые доли для каждого актива. Общая сумма должна быть равна 100%.
+                        {translate(language, 'Укажите целевые доли для каждого актива. Общая сумма должна быть равна 100%.', 'Set target allocations for each asset. The total must equal 100%.')}
                     </p>
                     <div className="space-y-4">
                         {/* Map over unique assets to create an input field for each */}
@@ -113,9 +115,9 @@ const RebalanceSettings: React.FC<RebalanceSettingsProps> = ({ allAssets, curren
 
                     {/* Total percentage display */}
                     <div className="mt-6 pt-4 border-t border-slate-200 dark:border-slate-700 flex justify-end items-center font-semibold">
-                        <span className={`${UI_CLASSES.textSecondary} mr-4`}>Итого:</span>
+                        <span className={`${UI_CLASSES.textSecondary} mr-4`}>{translate(language, 'Итого:', 'Total:')}</span>
                         <span className={isSaveDisabled ? 'text-red-500' : 'text-green-500'}>
-                            {total.toLocaleString('ru-RU', { maximumFractionDigits: 2 })}%
+                            {total.toLocaleString(language === 'ru' ? 'ru-RU' : 'en-US', { maximumFractionDigits: 2 })}%
                         </span>
                     </div>
                 </div>
@@ -128,7 +130,7 @@ const RebalanceSettings: React.FC<RebalanceSettingsProps> = ({ allAssets, curren
                     disabled={isSaveDisabled}
                     className={`w-full max-w-md md:max-w-2xl mx-auto block ${UI_CLASSES.actionButton} font-semibold py-3 px-6 rounded-lg text-lg shadow-lg hover:shadow-xl transform transition-all duration-200 ease-in-out hover:-translate-y-0.5 active:scale-95 active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none disabled:hover:translate-y-0`}
                 >
-                    Сохранить
+                    {translate(language, 'Сохранить', 'Save')}
                 </button>
             </footer>
         </div>
